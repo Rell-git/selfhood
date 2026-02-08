@@ -140,6 +140,26 @@
             padding: 2rem 0;
         }
 
+        .sidebar-watermark {
+            padding: 1.5rem 2rem 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            opacity: 0.35;
+            text-align: center;
+            margin-bottom: -90px;
+            pointer-events: none;
+            /* can't be clicked */
+            user-select: none;
+            /* can't be selected/copied */
+        }
+
+        body.dark-mode .sidebar-watermark {
+            color: var(--text-dark);
+            opacity: 0.4;
+            /* slightly higher in dark mode if you want */
+        }
+
         body.dark-mode .sidebar {
             background: var(--card-dark);
             border-right-color: var(--border-dark);
@@ -920,6 +940,7 @@
             <li class="sidebar-item" onclick="navigateTo('records')">🏆 Records</li>
             <li class="sidebar-item" onclick="navigateTo('about')">ℹ️ About</li>
             <li class="sidebar-item" onclick="navigateTo('project')">🚀 Our Project</li>
+            <li class="sidebar-watermark">by: ray blazo</li>
         </ul>
     </div>
 
