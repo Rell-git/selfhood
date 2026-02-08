@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>selfhood</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-light: #faf8f5;
+            --text-light: #1a1a1a;
+            --hr-light: #1e3a8a;
+            --card-light: #ffffff;
+            --border-light: #e5e5e5;
+            --accent-light: #1e3a8a;
+            --shadow-light: rgba(30, 58, 138, 0.08);
+
+            --bg-dark: #0f172a;
+            --text-dark: #f1f5f9;
+            --hr-dark: #14b8a6;
+            --card-dark: #1e293b;
+            --border-dark: #334155;
+            --accent-dark: #14b8a6;
+            --shadow-dark: rgba(20, 184, 166, 0.15);
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+        }
+
+        body.dark-mode #loading-screen {
+            background: var(--bg-dark);
+        }
+
+        #loading-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--accent-light);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        body.dark-mode .loading-title {
+            color: var(--accent-dark);
+        }
+
+        .loading-subtitle {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.3rem;
+            color: var(--text-light);
+            text-align: center;
+            max-width: 500px;
+            padding: 0 2rem;
+            animation: fadeIn 0.8s ease 0.3s both;
+        }
+
+        body.dark-mode .loading-subtitle {
+            color: var(--text-dark);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+            min-height: 100vh;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            opacity: 0;
+            animation: bodyFadeIn 0.5s ease 0.3s forwards;
+            scroll-behavior: smooth;
+        }
+
+        @keyframes bodyFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: var(--card-light);
+            border-right: 2px solid var(--border-light);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem 0;
+        }
+
+        body.dark-mode .sidebar {
+            background: var(--card-dark);
+            border-right-color: var(--border-dark);
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 2rem;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 1rem;
+        }
+
+        body.dark-mode .sidebar-header {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .sidebar-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--accent-light);
+        }
+
+        body.dark-mode .sidebar-title {
+            color: var(--accent-dark);
+        }
+
+        .theme-toggle-item {
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 1rem;
+        }
+
+        body.dark-mode .theme-toggle-item {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--border-light);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .toggle-switch {
+            background: var(--border-dark);
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-light);
+        }
+
+        body.dark-mode .toggle-switch.active {
+            background: var(--accent-dark);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 33px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: var(--bg-light);
+            border-left-color: var(--accent-light);
+        }
+
+        body.dark-mode .sidebar-item:hover,
+        body.dark-mode .sidebar-item.active {
+            background: var(--bg-dark);
+            border-left-color: var(--accent-dark);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* Menu Toggle */
+        .menu-toggle {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: var(--accent-light);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px var(--shadow-light);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        body.dark-mode .menu-toggle {
+            background: var(--accent-dark);
+            color: var(--bg-dark);
+            box-shadow: 0 4px 12px var(--shadow-dark);
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: pageSlide 0.3s ease;
+        }
+
+        @keyframes pageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem 4rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            color: var(--accent-light);
+            transition: color 0.4s ease;
+        }
+
+        body.dark-mode h1 {
+            color: var(--accent-dark);
+        }
+
+        .mode {
+            height: 6px;
+            background: var(--hr-light);
+            border: none;
+            border-radius: 3px;
+            margin: 0 auto 3rem;
+            max-width: 200px;
+            transition: background 0.4s ease;
+            box-shadow: 0 2px 8px var(--shadow-light);
+        }
+
+        body.dark-mode .mode {
+            background: var(--hr-dark);
+            box-shadow: 0 2px 8px var(--shadow-dark);
+        }
+
+        .content-box {
+            background: var(--card-light);
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px var(--shadow-light);
+            transition: all 0.4s ease;
+        }
+
+        body.dark-mode .content-box {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+            box-shadow: 0 4px 20px var(--shadow-dark);
+        }
+
+        body.dark-mode .content-box p,
+        body.dark-mode .content-box div {
+            color: var(--text-dark);
+        }
+
+        .section-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+            color: var(--accent-light);
+        }
+
+        body.dark-mode .section-title {
+            color: var(--accent-dark);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background: var(--bg-light);
+            border-radius: 12px;
+        }
+
+        body.dark-mode .stat-card {
+            background: var(--bg-dark);
+        }
+
+        .stat-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-light);
+        }
+
+        body.dark-mode .stat-value {
+            color: var(--accent-dark);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .stat-label {
+            color: var(--text-dark);
+        }
+
+        /* Level Display */
+        .level-display {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--accent-light), var(--hr-light));
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        body.dark-mode .level-display {
+            background: linear-gradient(135deg, var(--accent-dark), var(--hr-dark));
+            color: var(--bg-dark);
+        }
+
+        .level-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .xp-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.5s ease;
+        }
+
+        /* Badges */
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            text-align: center;
+            padding: 1rem 0.5rem;
+            background: var(--bg-light);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .badge {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+        }
+
+        .badge.unlocked {
+            border-color: var(--accent-light);
+            transform: scale(1.05);
+        }
+
+        body.dark-mode .badge.unlocked {
+            border-color: var(--accent-dark);
+        }
+
+        .badge-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge.locked .badge-icon {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+
+        .badge-name {
+            font-size: 0.75rem;
+            font-family: 'Space Mono', monospace;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .badge-name {
+            color: var(--text-dark);
+        }
+
+        /* Buttons */
+        button {
+            font-family: 'Space Mono', monospace;
+            padding: 0.9rem 2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border: 2px solid var(--accent-light);
+            background: transparent;
+            color: var(--accent-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        body.dark-mode button {
+            border-color: var(--accent-dark);
+            color: var(--accent-dark);
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--accent-light);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        body.dark-mode button:hover:not(:disabled) {
+            background: var(--accent-dark);
+            color: var(--bg-dark);
+            box-shadow: 0 4px 12px var(--shadow-dark);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--accent-light);
+            color: white;
+        }
+
+        body.dark-mode .btn-primary {
+            background: var(--accent-dark);
+            color: var(--bg-dark);
+        }
+
+        /* Mood */
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .mood-btn {
+            padding: 1.5rem;
+            font-size: 2.5rem;
+            background: var(--bg-light);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        body.dark-mode .mood-btn {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+        }
+
+        .mood-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            border-color: var(--accent-light);
+        }
+
+        body.dark-mode .mood-btn:hover:not(:disabled) {
+            border-color: var(--accent-dark);
+        }
+
+        .mood-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .mood-label {
+            color: var(--text-dark);
+        }
+
+        /* Form Elements */
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        body.dark-mode textarea {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-light);
+        }
+
+        body.dark-mode textarea:focus {
+            border-color: var(--accent-dark);
+        }
+
+        textarea:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Journal Prompt */
+        .journal-prompt-box {
+            font-size: 1.1rem;
+            font-style: italic;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-light);
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .journal-prompt-box {
+            background: var(--bg-dark);
+            border-left-color: var(--accent-dark);
+            color: var(--text-dark);
+        }
+
+        /* Ad Container */
+        .ad-container {
+            margin: 2rem 0;
+            padding: 1rem;
+            text-align: center;
+            overflow-x: auto;
+            background: var(--card-light);
+            border-radius: 8px;
+            border: 2px solid var(--border-light);
+        }
+
+        body.dark-mode .ad-container {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+
+        .ad-container iframe {
+            max-width: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-light);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        body.dark-mode .modal-content {
+            background: var(--card-dark);
+        }
+
+        body.dark-mode .modal-content p,
+        body.dark-mode .modal-content h2,
+        body.dark-mode .modal-content div {
+            color: var(--text-dark);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .modal-close {
+            color: var(--text-dark);
+        }
+
+        /* Records */
+        .record-item {
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-light);
+        }
+
+        body.dark-mode .record-item {
+            background: var(--bg-dark);
+            border-left-color: var(--accent-dark);
+        }
+
+        .record-date {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .record-date {
+            color: var(--text-dark);
+        }
+
+        .record-text {
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .record-text {
+            color: var(--text-dark);
+        }
+
+        /* Project Card */
+        .project-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        body.dark-mode .project-card {
+            background: var(--bg-dark);
+        }
+
+        body.dark-mode .project-card h3,
+        body.dark-mode .project-card p {
+            color: var(--text-dark);
+        }
+
+        .project-img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 2px solid var(--border-light);
+        }
+
+        body.dark-mode .project-img {
+            border-color: var(--border-dark);
+        }
+
+        .project-link {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--accent-light);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .project-link {
+            background: var(--accent-dark);
+            color: var(--bg-dark);
+        }
+
+        .project-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                top: 1rem;
+                left: 1rem;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .loading-title {
+                font-size: 2.5rem;
+            }
+
+            .level-number {
+                font-size: 2.5rem;
+            }
+
+            .content-box {
+                padding: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .mood-btn {
+                font-size: 2rem;
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            button {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .ad-container {
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem 0.75rem 3rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .badges-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .ad-container {
+                margin: 1.5rem 0;
+                padding: 0.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <h1 class="loading-title">selfhood</h1>
+        <p class="loading-subtitle">Make yourself free and disciplined. Build the person you're meant to be.</p>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">selfhood</h2>
+        </div>
+
+        <div class="theme-toggle-item">
+            <span>Dark Mode</span>
+            <div class="toggle-switch" id="theme-toggle" onclick="toggleTheme()">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="sidebar-item active" onclick="navigateTo('home')">🏠 Home</li>
+            <li class="sidebar-item" onclick="navigateTo('progress')">📊 Progress</li>
+            <li class="sidebar-item" onclick="navigateTo('records')">🏆 Records</li>
+            <li class="sidebar-item" onclick="navigateTo('about')">ℹ️ About</li>
+            <li class="sidebar-item" onclick="navigateTo('project')">🚀 Our Project</li>
+        </ul>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Menu Toggle -->
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+    <!-- HOME PAGE -->
+    <div id="home-page" class="page active">
+        <div class="container">
+            <header>
+                <h1>selfhood</h1>
+                <hr class="mode">
+            </header>
+
+            <!-- Quote + Streak Box -->
+            <div class="content-box">
+                <h3 class="section-title">💬 Daily Quote</h3>
+                <p id="daily-quote"
+                    style="font-size: 1.2rem; font-style: italic; text-align: center; margin-bottom: 2rem;"></p>
+
+                <h3 class="section-title">Did you goon today?</h3>
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="font-family: 'Space Mono', monospace; font-size: 4rem; font-weight: 700; color: var(--accent-light);"
+                        id="streak-count">0</div>
+                    <div style="font-size: 1.2rem; opacity: 0.7;" id="streak-label">days clean</div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="handleYes()">Yes</button>
+                    <button onclick="handleNo()" id="no-btn">No</button>
+                </div>
+            </div>
+
+            <!-- Bible Verse -->
+            <div class="content-box">
+                <h3 class="section-title">✝️ Daily Verse</h3>
+                <p id="verse-text" style="font-size: 1.1rem; font-style: italic; margin-bottom: 1rem;"></p>
+                <p id="verse-ref" style="font-family: 'Space Mono', monospace; opacity: 0.7;"></p>
+            </div>
+
+            <!-- Mood Tracker -->
+            <div class="content-box">
+                <h3 class="section-title">😊 Mood Check</h3>
+                <p style="margin-bottom: 1rem;">How are you feeling today?</p>
+                <div class="mood-grid">
+                    <button class="mood-btn" onclick="selectMood('low')" id="mood-low">
+                        😞
+                        <span class="mood-label">Low</span>
+                    </button>
+                    <button class="mood-btn" onclick="selectMood('okay')" id="mood-okay">
+                        😐
+                        <span class="mood-label">Okay</span>
+                    </button>
+                    <button class="mood-btn" onclick="selectMood('good')" id="mood-good">
+                        🙂
+                        <span class="mood-label">Good</span>
+                    </button>
+                </div>
+                <div id="mood-cooldown"
+                    style="display: none; text-align: center; margin-top: 1rem; font-family: 'Space Mono', monospace; color: var(--accent-light);">
+                </div>
+            </div>
+
+            <!-- Ad Banner (728x90) -->
+            <div class="ad-container">
+                <script>
+                    atOptions = {
+                        'key': '6d45cdeb8cb7e39a34ca1366c9959a12',
+                        'format': 'iframe',
+                        'height': 90,
+                        'width': 728,
+                        'params': {}
+                    };
+                </script>
+                <script src="https://www.highperformanceformat.com/6d45cdeb8cb7e39a34ca1366c9959a12/invoke.js"></script>
+            </div>
+
+            <!-- Journal -->
+            <div class="content-box">
+                <h3 class="section-title">📝 Daily Journal</h3>
+                <div class="journal-prompt-box" id="journal-prompt"></div>
+                <textarea id="journal-textarea" placeholder="Write your thoughts..."></textarea>
+                <button class="btn-primary" style="width: 100%; margin-top: 1rem;" onclick="saveJournal()"
+                    id="journal-save-btn">Save Entry</button>
+                <div id="journal-saved"
+                    style="display: none; text-align: center; margin-top: 1rem; color: var(--accent-light); font-family: 'Space Mono', monospace;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROGRESS PAGE -->
+    <div id="progress-page" class="page">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Progress</h1>
+
+            <div class="content-box">
+                <h3 class="section-title">📊 Level & XP</h3>
+                <div class="level-display">
+                    <div>Level</div>
+                    <div class="level-number" id="level-display">1</div>
+                    <div class="xp-bar">
+                        <div class="xp-fill" id="xp-fill" style="width: 0%"></div>
+                    </div>
+                    <div style="margin-top: 0.5rem;" id="xp-text">0 / 100 XP</div>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <h3 class="section-title">🏅 Badges</h3>
+                <div class="badges-grid" id="badges-container"></div>
+            </div>
+
+            <div class="content-box">
+                <h3 class="section-title">📈 Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-days">0</div>
+                        <div class="stat-label">Total Days</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="current-streak">0</div>
+                        <div class="stat-label">Current Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="success-rate">0%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECORDS PAGE -->
+    <div id="records-page" class="page">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Records</h1>
+
+            <div class="content-box">
+                <h3 class="section-title">🏆 Longest Streak</h3>
+                <div style="text-align: center; padding: 2rem; background: var(--bg-light); border-radius: 12px;">
+                    <div style="font-family: 'Space Mono', monospace; font-size: 3rem; font-weight: 700; color: var(--accent-light);"
+                        id="record-streak">0</div>
+                    <div style="opacity: 0.7;">days</div>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <h3 class="section-title">📊 Mood History</h3>
+                <div id="mood-history" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+
+            <div class="content-box">
+                <h3 class="section-title">📝 Journal Entries</h3>
+                <div id="journal-history" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABOUT PAGE -->
+    <div id="about-page" class="page">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 2rem;">About Selfhood</h1>
+
+            <div class="content-box">
+                <h3 class="section-title">What is Selfhood?</h3>
+                <p style="line-height: 1.7; margin-bottom: 1rem;">
+                    <strong>Selfhood</strong> is a personal development app designed to help you break free from
+                    destructive habits and build a better version of yourself.
+                </p>
+                <p style="line-height: 1.7; margin-bottom: 1rem;">
+                    Whether you're struggling with addiction, working on self-discipline, or simply trying to be more
+                    mindful, Selfhood provides the tools, tracking, and support you need to make real progress.
+                </p>
+                <p style="line-height: 1.7;">
+                    This app is about <strong>progress, not perfection</strong>. Every day is a chance to choose
+                    yourself.
+                </p>
+            </div>
+
+            <div class="content-box">
+                <h3 class="section-title">Features</h3>
+                <ul style="line-height: 2; margin-left: 1.5rem;">
+                    <li>Daily streak tracking</li>
+                    <li>Mood monitoring with hourly check-ins</li>
+                    <li>Guided daily journal prompts</li>
+                    <li>Progress gamification (levels, XP, badges)</li>
+                    <li>Personal records and history</li>
+                    <li>Clean, distraction-free interface</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- OUR PROJECT PAGE -->
+    <div id="project-page" class="page">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Our Project</h1>
+
+            <div class="content-box">
+                <div class="project-card">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600" alt="Our Project"
+                        class="project-img">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">Join Our Community</h3>
+                    <p style="margin-bottom: 1.5rem; line-height: 1.7;">
+                        We're building a supportive community for personal growth and development. Connect with others
+                        on the same journey.
+                    </p>
+                    <a href="https://your-project-link.com" target="_blank" class="project-link">Visit Our Project →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mood Modal -->
+    <div id="mood-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('mood-modal')">×</button>
+            <div id="mood-modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const quotes = [
+            "Progress, not perfection.",
+            "Every day is a new beginning.",
+            "Strength grows in the moments when you think you can't go on.",
+            "The only way out is through.",
+            "You are stronger than you know.",
+            "One day at a time.",
+            "Recovery is not a race.",
+            "Fall seven times, stand up eight.",
+            "Your story isn't over yet.",
+            "Courage doesn't always roar."
+        ];
+
+        const verses = [
+            { text: "I can do all things through Christ who strengthens me.", reference: "Philippians 4:13" },
+            { text: "For God has not given us a spirit of fear, but of power and of love and of a sound mind.", reference: "2 Timothy 1:7" },
+            { text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.", reference: "Psalm 34:18" },
+            { text: "Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!", reference: "2 Corinthians 5:17" },
+            { text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", reference: "Philippians 4:6" }
+        ];
+
+        const journalPrompts = [
+            "What did you do today even though you didn't feel like it?",
+            "What drained your energy today?",
+            "What's one small win you usually ignore?",
+            "If today was 1% better, why?",
+            "What made you feel alive today, even for a moment?",
+            "What would you tell yesterday's version of yourself?",
+            "What are you grateful for today, no matter how small?"
+        ];
+
+        const badges = [
+            { id: '7day', name: '7 Days', icon: '🔥', requirement: 7 },
+            { id: '14day', name: '2 Weeks', icon: '⭐', requirement: 14 },
+            { id: '30day', name: '1 Month', icon: '💎', requirement: 30 },
+            { id: '60day', name: '2 Months', icon: '👑', requirement: 60 },
+            { id: '90day', name: '3 Months', icon: '🏆', requirement: 90 },
+            { id: '180day', name: '6 Months', icon: '🎖️', requirement: 180 }
+        ];
+
+        // Initialize
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('fade-out');
+            }, 3000);
+            init();
+        });
+
+        function init() {
+            loadTheme();
+            loadData();
+            updateUI();
+            renderBadges();
+            updateRecords();
+        }
+
+        function loadData() {
+            if (!localStorage.getItem('streak')) {
+                localStorage.setItem('streak', '0');
+                localStorage.setItem('totalDays', '0');
+                localStorage.setItem('xp', '0');
+                localStorage.setItem('level', '1');
+                localStorage.setItem('longestStreak', '0');
+                localStorage.setItem('totalCleanDays', '0');
+                localStorage.setItem('totalRelapses', '0');
+            }
+        }
+
+        function getDailyIndex(arr) {
+            const today = new Date().toDateString();
+            const seed = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            return seed % arr.length;
+        }
+
+        function updateUI() {
+            // Quote & Verse
+            document.getElementById('daily-quote').textContent = `"${quotes[getDailyIndex(quotes)]}"`;
+            const verse = verses[getDailyIndex(verses)];
+            document.getElementById('verse-text').textContent = `"${verse.text}"`;
+            document.getElementById('verse-ref').textContent = `— ${verse.reference}`;
+
+            // Journal
+            document.getElementById('journal-prompt').textContent = journalPrompts[getDailyIndex(journalPrompts)];
+
+            // Streak
+            const streak = parseInt(localStorage.getItem('streak') || '0');
+            document.getElementById('streak-count').textContent = streak;
+            document.getElementById('streak-label').textContent = streak === 1 ? 'day clean' : 'days clean';
+            if (document.getElementById('current-streak')) {
+                document.getElementById('current-streak').textContent = streak;
+            }
+
+            // XP & Level
+            const xp = parseInt(localStorage.getItem('xp') || '0');
+            const level = parseInt(localStorage.getItem('level') || '1');
+            const xpForNextLevel = level * 100;
+            const xpProgress = (xp / xpForNextLevel) * 100;
+
+            if (document.getElementById('level-display')) {
+                document.getElementById('level-display').textContent = level;
+                document.getElementById('xp-fill').style.width = `${xpProgress}%`;
+                document.getElementById('xp-text').textContent = `${xp} / ${xpForNextLevel} XP`;
+            }
+
+            // Stats
+            if (document.getElementById('total-days')) {
+                document.getElementById('total-days').textContent = localStorage.getItem('totalDays') || '0';
+                const cleanDays = parseInt(localStorage.getItem('totalCleanDays') || '0');
+                const relapses = parseInt(localStorage.getItem('totalRelapses') || '0');
+                const total = cleanDays + relapses;
+                const successRate = total > 0 ? Math.round((cleanDays / total) * 100) : 0;
+                document.getElementById('success-rate').textContent = `${successRate}%`;
+            }
+
+            if (document.getElementById('record-streak')) {
+                document.getElementById('record-streak').textContent = localStorage.getItem('longestStreak') || '0';
+            }
+
+            // Load journal
+            const today = new Date().toDateString();
+            const entries = JSON.parse(localStorage.getItem('journalEntries') || '{}');
+            const textarea = document.getElementById('journal-textarea');
+            const saveBtn = document.getElementById('journal-save-btn');
+
+            if (entries[today]) {
+                textarea.value = entries[today];
+                textarea.disabled = true;
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Already Saved Today';
+            } else {
+                textarea.value = '';
+                textarea.disabled = false;
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Entry';
+            }
+
+            checkMoodCooldown();
+            checkNoButtonStatus();
+        }
+
+        function checkNoButtonStatus() {
+            const lastClick = localStorage.getItem('lastNoClick');
+            const today = new Date().toDateString();
+            const btn = document.getElementById('no-btn');
+
+            if (lastClick === today) {
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+            }
+        }
+
+        // Navigation
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('show');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('show');
+        }
+
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`${page}-page`).classList.add('active');
+
+            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+
+            closeSidebar();
+            window.scrollTo(0, 0);
+        }
+
+        // Theme
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const toggle = document.getElementById('theme-toggle');
+            toggle.classList.toggle('active');
+
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        function loadTheme() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-toggle').classList.add('active');
+            }
+        }
+
+        // Streak
+        function handleYes() {
+            if (confirm('Are you sure you gooned today? This will reset your streak.')) {
+                localStorage.setItem('streak', '0');
+                const relapses = parseInt(localStorage.getItem('totalRelapses') || '0');
+                localStorage.setItem('totalRelapses', String(relapses + 1));
+                updateUI();
+                renderBadges();
+            }
+        }
+
+        function handleNo() {
+            const today = new Date().toDateString();
+            const lastClick = localStorage.getItem('lastNoClick');
+
+            if (lastClick === today) {
+                return;
+            }
+
+            const streak = parseInt(localStorage.getItem('streak') || '0') + 1;
+            const longest = parseInt(localStorage.getItem('longestStreak') || '0');
+            const cleanDays = parseInt(localStorage.getItem('totalCleanDays') || '0');
+
+            localStorage.setItem('streak', String(streak));
+            localStorage.setItem('lastNoClick', today);
+            localStorage.setItem('totalDays', String(parseInt(localStorage.getItem('totalDays') || '0') + 1));
+            localStorage.setItem('totalCleanDays', String(cleanDays + 1));
+
+            if (streak > longest) {
+                localStorage.setItem('longestStreak', String(streak));
+            }
+
+            addXP(10);
+            updateUI();
+            renderBadges();
+        }
+
+        // XP System
+        function addXP(amount) {
+            let xp = parseInt(localStorage.getItem('xp') || '0');
+            let level = parseInt(localStorage.getItem('level') || '1');
+
+            xp += amount;
+
+            while (xp >= level * 100) {
+                xp -= level * 100;
+                level++;
+            }
+
+            localStorage.setItem('xp', String(xp));
+            localStorage.setItem('level', String(level));
+        }
+
+        // Badges
+        function renderBadges() {
+            const container = document.getElementById('badges-container');
+            if (!container) return;
+
+            const streak = parseInt(localStorage.getItem('streak') || '0');
+
+            container.innerHTML = badges.map(badge => {
+                const unlocked = streak >= badge.requirement;
+                return `
+                    <div class="badge ${unlocked ? 'unlocked' : 'locked'}">
+                        <div class="badge-icon">${badge.icon}</div>
+                        <div class="badge-name">${badge.name}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Mood
+        function selectMood(mood) {
+            const lastMood = localStorage.getItem('lastMoodTime');
+            const now = Date.now();
+
+            if (lastMood && (now - parseInt(lastMood)) < 3600000) {
+                alert('You can track mood once per hour');
+                return;
+            }
+
+            saveMoodRecord(mood);
+            localStorage.setItem('lastMoodTime', String(now));
+
+            if (mood === 'low') {
+                showLowMoodModal();
+            } else if (mood === 'okay') {
+                showOkayResponse();
+            } else {
+                showGoodResponse();
+            }
+
+            updateUI();
+            updateRecords();
+        }
+
+        function saveMoodRecord(mood) {
+            const records = JSON.parse(localStorage.getItem('moodRecords') || '[]');
+            const now = new Date();
+            records.push({
+                mood,
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+                timestamp: now.toISOString()
+            });
+            localStorage.setItem('moodRecords', JSON.stringify(records));
+        }
+
+        function checkMoodCooldown() {
+            const lastMood = localStorage.getItem('lastMoodTime');
+            if (!lastMood) return;
+
+            const now = Date.now();
+            const diff = now - parseInt(lastMood);
+            const remaining = 3600000 - diff;
+
+            const buttons = ['mood-low', 'mood-okay', 'mood-good'];
+
+            if (remaining > 0) {
+                const minutes = Math.ceil(remaining / 60000);
+                const cooldown = document.getElementById('mood-cooldown');
+                cooldown.style.display = 'block';
+                cooldown.textContent = `Next mood check in ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+
+                buttons.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.disabled = true;
+                });
+
+                setTimeout(checkMoodCooldown, 60000);
+            } else {
+                document.getElementById('mood-cooldown').style.display = 'none';
+                buttons.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.disabled = false;
+                });
+            }
+        }
+
+        function showLowMoodModal() {
+            const content = document.getElementById('mood-modal-content');
+            content.innerHTML = `
+                <h2 style="font-family: 'Space Mono', monospace; margin-bottom: 1.5rem; text-align: center; color: var(--accent-light);">Why are you feeling low?</h2>
+                <div style="padding: 1rem; margin-bottom: 1rem; background: var(--bg-light); border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; text-align: center;" onclick="showResponse('relapse')">I relapsed / I gooned</div>
+                <div style="padding: 1rem; margin-bottom: 1rem; background: var(--bg-light); border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; text-align: center;" onclick="showResponse('sinner')">I feel like a sinner</div>
+                <div style="padding: 1rem; margin-bottom: 1rem; background: var(--bg-light); border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; text-align: center;" onclick="showResponse('lonely')">I'm lonely</div>
+                <div style="padding: 1rem; margin-bottom: 1rem; background: var(--bg-light); border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; text-align: center;" onclick="showResponse('overwhelmed')">I'm overwhelmed</div>
+                <div style="padding: 1rem; background: var(--bg-light); border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; text-align: center;" onclick="showResponse('unknown')">I don't know why</div>
+            `;
+            openModal('mood-modal');
+        }
+
+        function showResponse(type) {
+            const responses = {
+                relapse: "It's okay. A slip doesn't erase your progress. You're still moving forward. <br><br><strong>Try this:</strong> Take a 5-minute walk to reset your mind.",
+                sinner: "\"If we confess our sins, he is faithful and just and will forgive us our sins.\" — 1 John 1:9<br><br><strong>Try this:</strong> Spend 5 minutes in honest prayer.",
+                lonely: "Loneliness is hard. But you're not alone in feeling alone. <br><br><strong>Try this:</strong> Text someone you haven't talked to in a while.",
+                overwhelmed: "You don't have to solve everything today. Just the next small thing. <br><br><strong>Try this:</strong> Write down everything, then pick ONE thing.",
+                unknown: "Sometimes there's no reason. And that's okay. You don't have to explain everything. <br><br><strong>Try this:</strong> Rest. Your body might be telling you something."
+            };
+
+            const content = document.getElementById('mood-modal-content');
+            content.innerHTML = `
+                <h2 style="font-family: 'Space Mono', monospace; margin-bottom: 1.5rem; text-align: center; color: var(--accent-light);">You're Not Alone</h2>
+                <p style="font-size: 1.1rem; line-height: 1.7; padding: 1.5rem; background: var(--bg-light); border-radius: 8px;">${responses[type]}</p>
+            `;
+        }
+
+        function showOkayResponse() {
+            const content = document.getElementById('mood-modal-content');
+            content.innerHTML = `
+                <h2 style="font-family: 'Space Mono', monospace; margin-bottom: 1.5rem; text-align: center; color: var(--accent-light);">That's Valid</h2>
+                <p style="font-size: 1.1rem; line-height: 1.7; padding: 1.5rem; background: var(--bg-light); border-radius: 8px;">Okay is enough. You don't have to be amazing every day. <br><br><strong>Try this:</strong> Do one thing that makes you feel 1% better.</p>
+            `;
+            openModal('mood-modal');
+        }
+
+        function showGoodResponse() {
+            const content = document.getElementById('mood-modal-content');
+            content.innerHTML = `
+                <h2 style="font-family: 'Space Mono', monospace; margin-bottom: 1.5rem; text-align: center; color: var(--accent-light);">That's Amazing! 🎉</h2>
+                <p style="font-size: 1.1rem; line-height: 1.7; padding: 1.5rem; background: var(--bg-light); border-radius: 8px;">Good days matter. Let yourself enjoy this. You deserve it. <br><br><strong>Try this:</strong> Write down why today felt good.</p>
+            `;
+            openModal('mood-modal');
+        }
+
+        // Journal
+        function saveJournal() {
+            const text = document.getElementById('journal-textarea').value;
+            const today = new Date().toDateString();
+
+            if (text.trim()) {
+                const entries = JSON.parse(localStorage.getItem('journalEntries') || '{}');
+                entries[today] = text;
+                localStorage.setItem('journalEntries', JSON.stringify(entries));
+
+                document.getElementById('journal-saved').textContent = '✓ Entry saved for today';
+                document.getElementById('journal-saved').style.display = 'block';
+
+                setTimeout(() => {
+                    document.getElementById('journal-saved').style.display = 'none';
+                }, 3000);
+
+                updateUI();
+                updateRecords();
+            }
+        }
+
+        // Records
+        function updateRecords() {
+            // Mood History
+            const moodRecords = JSON.parse(localStorage.getItem('moodRecords') || '[]');
+            const moodHistory = document.getElementById('mood-history');
+
+            if (!moodHistory) return;
+
+            if (moodRecords.length === 0) {
+                moodHistory.innerHTML = '<p style="text-align: center; opacity: 0.7;">No mood records yet</p>';
+            } else {
+                const moodEmojis = { low: '😞', okay: '😐', good: '🙂' };
+                moodHistory.innerHTML = moodRecords.slice().reverse().slice(0, 20).map(record => `
+                    <div class="record-item">
+                        <div class="record-date">${record.date} at ${record.time}</div>
+                        <div class="record-text">${moodEmojis[record.mood]} ${record.mood.charAt(0).toUpperCase() + record.mood.slice(1)}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Journal History
+            const journalEntries = JSON.parse(localStorage.getItem('journalEntries') || '{}');
+            const journalHistory = document.getElementById('journal-history');
+
+            if (!journalHistory) return;
+
+            if (Object.keys(journalEntries).length === 0) {
+                journalHistory.innerHTML = '<p style="text-align: center; opacity: 0.7;">No journal entries yet</p>';
+            } else {
+                const sortedEntries = Object.entries(journalEntries).sort((a, b) => new Date(b[0]) - new Date(a[0])).slice(0, 10);
+                journalHistory.innerHTML = sortedEntries.map(([date, text]) => `
+                    <div class="record-item">
+                        <div class="record-date">${date}</div>
+                        <div class="record-text">${text.substring(0, 150)}${text.length > 150 ? '...' : ''}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Modal
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("service-worker.js")
+                .then(() => console.log("PWA ready"))
+                .catch(err => console.log(err));
+        }
+    </script>
+</body>
+
+</html>
